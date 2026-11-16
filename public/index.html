@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#082b30">
+<title>NEXORA | Cadastro empresarial</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f2f6f5;color:#12333a;font-family:Arial,sans-serif}
+header{background:#082b30;color:white;padding:25px 20px}
+header h1{margin:0;color:#75c7a0;letter-spacing:3px}
+header p{margin:7px 0;color:#c3d6d3}
+main{max-width:650px;margin:auto;padding:25px 18px}
+.status{background:#e0f3e8;padding:12px;border-radius:9px;color:#17633f}
+.card{background:white;padding:22px;border-radius:14px;margin-top:20px}
+label{display:block;font-weight:bold;margin-top:17px}
+input,select{width:100%;padding:14px;margin-top:7px;border:1px solid #ccd9d6;border-radius:8px;font-size:16px}
+button{width:100%;padding:16px;margin-top:22px;background:#126b55;color:white;border:0;border-radius:9px;font-size:16px;font-weight:bold}
+#mensagem{margin-top:15px;line-height:1.5}
+.nota{font-size:12px;color:#718588;line-height:1.5}
+</style>
+</head>
+<body>
+<header>
+<h1>NEXORA</h1>
+<p>CARBON & CLIMATE SOLUTIONS</p>
+</header>
+<main>
+<div class="status" id="status">Verificando plataforma...</div>
+<div class="card">
+<h2>Cadastro empresarial</h2>
+<p>Crie sua conta e inicie sua jornada de diagnóstico climático.</p>
+<form id="cadastro">
+<label>Razão social</label>
+<input name="razaoSocial" required maxlength="150">
+<label>CNPJ</label>
+<input name="cnpj" required inputmode="numeric" maxlength="18" placeholder="00.000.000/0000-00">
+<label>E-mail corporativo</label>
+<input name="email" type="email" required maxlength="150">
+<label>Setor de atividade</label>
+<select name="setor" required>
+<option value="">Selecione</option>
+<option>Indústria</option>
+<option>Comércio</option>
+<option>Serviços</option>
+<option>Agronegócio</option>
+<option>Transporte e logística</option>
+<option>Energia</option>
+<option>Outro</option>
+</select>
+<label>Crie uma senha</label>
+<div style="position:relative;width:100%">
+<input id="senha" name="senha" type="password" required minlength="10" autocomplete="new-password" style="width:100%;box-sizing:border-box;padding-right:58px">
+<button type="button" onclick="const s=document.getElementById('senha');const v=s.type==='password';s.type=v?'text':'password';this.textContent=v?'🙈':'👁️'" aria-label="Mostrar senha" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);width:40px;height:40px;padding:0;border:0;background:transparent;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer">👁️</button>
+</div>
+<p class="nota">Mínimo de 10 caracteres. Não reutilize senhas de outros serviços.</p>
+<button type="submit">Criar cadastro empresarial</button>
+</form>
+<div id="mensagem" role="status"></div>
+</div>
+</main>
+<script>
+fetch('/api/status').then(r=>r.json()).then(d=>{
+  document.getElementById('status').textContent='● '+d.empresa+' conectada · '+d.status;
+}).catch(()=>{
+  document.getElementById('status').textContent='Servidor indisponível';
+});
+
+document.getElementById('cadastro').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const form=e.currentTarget;
+  const botao=form.querySelector('button');
+  const mensagem=document.getElementById('mensagem');
+  botao.disabled=true;
+  mensagem.textContent='Enviando cadastro...';
+  try{
+    const dados=Object.fromEntries(new FormData(form).entries());
+    const resposta=await fetch('/api/empresas',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(dados)
+    });
+    const resultado=await resposta.json();
+    mensagem.textContent=resultado.erro || resultado.mensagem;
+    if(resposta.ok) form.reset();
+  }catch{
+    mensagem.textContent='Não foi possível concluir o cadastro.';
+  }
+  botao.disabled=false;
+});
+</script>
+</body>
+</html>

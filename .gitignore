@@ -7,3 +7,5 @@ uploads/
 *.backup*
 .DS_Store
 backups/
+
+data/*.json
